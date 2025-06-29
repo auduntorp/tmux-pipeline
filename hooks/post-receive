@@ -1,0 +1,29 @@
+#!/bin/bash
+SESSION_NAME="deployment"
+WINDOW_NAME="training"
+function enqueue {
+	tmux has-session -t $SESSION_NAME &> /dev/null
+	if [ $? != 0 ]; then
+		pushd .. > /dev/null
+		mkdir -p .build_queue
+		unset GIT_DIR
+		tmux new-session -d -s $SESSION_NAME -n $WINDOW_NAME 'bash -i'
+		popd > /dev/null
+	fi
+	tmux send-keys -t $SESSION_NAME:$WINDOW_NAME "$1" Enter
+}
+while read oldrev newrev refname
+do
+	email="$(git log -1 --pretty=%ae $refname --)"
+	if [[ "$email" == *"@optoscale.no" ]]; then
+		echo "Queueing build for execution. Will send email to $email if it fails."
+		temp_output=/tmp/$newrev.output
+		if [[ ! -f "$temp_output" ]]; then
+			enqueue "hooks/checkout_and_build.sh $newrev $refname $email 2> $temp_output || mail -s 'failed to enqueue $refname' '$email' < $temp_output"
+		else
+			echo "The $refname has been built before. Will not queue it up."
+		fi
+	else
+		echo "Not sending e-mail to $email since it is not an Optoscale address"
+	fi
+done
