@@ -1,5 +1,5 @@
 # tmux pipeline 
-Execute build script when receiving git changes, and e-mail the git author on errors.
+Execute build script when receiving git changes, and e-mail authors on errors.
 
 ## installation
 Use hooks to enable pipeline based on tmux when you push to a git server:
