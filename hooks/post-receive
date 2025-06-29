@@ -19,7 +19,7 @@ do
 		echo "Queueing build for execution. Will send email to $email if it fails."
 		temp_output=/tmp/$newrev.output
 		if [[ ! -f "$temp_output" ]]; then
-			enqueue "hooks/checkout_and_build.sh $newrev $refname $email 2> $temp_output || mail -s 'failed to enqueue $refname' '$email' < $temp_output"
+			enqueue "checkout_and_build.sh $newrev $refname $email 2> $temp_output || mail -s 'failed to enqueue $refname' '$email' < $temp_output"
 		else
 			echo "The $refname has been built before. Will not queue it up."
 		fi
